@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Money">
 <meta name="theme-color" content="#1B1630">
 <meta name="referrer" content="no-referrer">
@@ -16,14 +16,10 @@
 <link rel="icon" type="image/png" href="icon-180.png">
 <title>Money</title>
 <style>
-  html, body { margin: 0; background: #1B1630; }
-  html { overflow: hidden; }
-  /* The frame covers the WHOLE screen (the script below sets its exact height, because "100%" in a
-     home-screen web app can stop short of the bottom). The app leaves room for the Dynamic Island
-     and home bar using the sizes measured by #probe. */
-  /* Not "fixed": on iPhone home-screen apps fixed layers are only drawn down to (screen − status bar),
-     which hid the bottom 62pt. A normal block with an exact pixel height is drawn to the bottom. */
-  iframe { display: block; position: absolute; left: 0; top: 0; width: 100%; height: 100vh; border: 0; background: #1B1630; }
+  html, body { margin: 0; height: 100%; background: #1B1630; overflow: hidden; }
+  /* The frame fills the page. Status bar style is "black" (not see-through): with the see-through
+     style iOS 26+ moves the home-screen app up under the clock and leaves the bottom 62pt empty. */
+  iframe { display: block; position: fixed; left: 0; top: 0; width: 100%; height: 100%; border: 0; background: #1B1630; }
   #probe { position: fixed; top: 0; left: 0; width: 1px; visibility: hidden; pointer-events: none;
            padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
   #msg { display: none; height: 100%; align-items: center; justify-content: center; text-align: center;
@@ -52,28 +48,23 @@
   var f = document.createElement('iframe');
   f.title = 'Money Tracker';
   f.referrerPolicy = 'no-referrer';
-  // The frame covers the whole screen. A frame can't see the Dynamic Island / home-bar sizes,
-  // so pass them along (plain numbers only) and the app leaves exactly that much room.
+  // A frame can't see the clock-bar / home-bar sizes, so pass them along (plain numbers only).
   var p = document.getElementById('probe'), cs = getComputedStyle(p);
   var st = Math.round(parseFloat(cs.paddingTop) || 0), sb = Math.round(parseFloat(cs.paddingBottom) || 0);
-  document.body.appendChild(f);
-  // On iPhone home-screen apps "100%" can stop short of the bottom of the screen; size by the window.
-  function fit() {
-    var full = window.innerHeight;
-    // A home-screen app always fills the whole screen, even when iOS reports a shorter window.
-    if (navigator.standalone) {
-      var land = window.matchMedia && matchMedia('(orientation: landscape)').matches;
-      full = Math.max(full, land ? screen.width : screen.height);
-    }
-    f.style.height = full + 'px';
-    document.body.style.height = full + 'px';
-    document.documentElement.style.height = full + 'px';
+  if (navigator.standalone) {
+    var tall = Math.max(screen.width, screen.height);
+    // Page drawn under the clock but iOS says 0: use the Dynamic Island height.
+    if (!st && window.innerHeight >= tall - 1) st = 59;
+    // Face ID iPhones have a home bar; iOS sometimes says 0.
+    if (!sb && tall >= 812) sb = 34;
   }
+  document.body.appendChild(f);
+  // Size by the real window height ("100%" can be wrong in home-screen apps).
+  function fit() { f.style.height = window.innerHeight + 'px'; }
   fit();
   // Screen numbers only (no personal data), shown as a small temporary check line in the app.
   var dbg = [window.innerHeight, document.documentElement.clientHeight, screen.height,
-    navigator.standalone ? 1 : 0, f.getBoundingClientRect().top, f.getBoundingClientRect().height,
-    window.visualViewport ? visualViewport.height : 0, window.visualViewport ? visualViewport.offsetTop : 0].map(Math.round).join('.');
+    navigator.standalone ? 1 : 0, st, sb].join('.');
   f.src = 'https://script.google.com/macros/s/' + d + '/exec#k=' + k + '&st=' + st + '&sb=' + sb + '&dbg=' + dbg;
   window.addEventListener('resize', fit);
   window.addEventListener('orientationchange', function () { setTimeout(fit, 300); });
