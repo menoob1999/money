@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- Money Tracker home-screen launcher. PUBLIC page (GitHub Pages): holds no data, no URL, no key.
+     The app's deployment id and key come after "#" in the home-screen link (never sent to any server). -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Money">
+<meta name="theme-color" content="#1B1630">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-180.png">
+<title>Money</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1B1630; overflow: hidden; }
+  body { box-sizing: border-box; padding: env(safe-area-inset-top) 0 0; }
+  iframe { display: block; width: 100%; height: 100%; border: 0; background: #1B1630; }
+  #msg { display: none; height: 100%; align-items: center; justify-content: center; text-align: center;
+         color: #B9B0D9; font: 15px/1.5 -apple-system, system-ui, sans-serif; padding: 24px; box-sizing: border-box; }
+</style>
+</head>
+<body>
+<div id="msg">Open Money Tracker from your home-screen link.</div>
+<script>
+(function () {
+  var KEY = 'mt_launch';
+  // Never run inside another website's frame.
+  if (window.top !== window.self) { document.getElementById('msg').style.display = 'flex'; return; }
+  var h = location.hash.slice(1);
+  var d = (/(?:^|&)d=([A-Za-z0-9_-]{20,120})(?:&|$)/.exec(h) || [])[1];
+  var k = (/(?:^|&)k=([0-9a-f]{64})(?:&|$)/.exec(h) || [])[1];
+  try {
+    if (d && k) localStorage.setItem(KEY, JSON.stringify({ d: d, k: k }));
+    else { var s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s) { d = s.d; k = s.k; } }
+  } catch (e) {}
+  if (!d || !k || !/^[A-Za-z0-9_-]+$/.test(d) || !/^[0-9a-f]{64}$/.test(k)) {
+    document.getElementById('msg').style.display = 'flex';
+    return;
+  }
+  var f = document.createElement('iframe');
+  f.title = 'Money Tracker';
+  f.referrerPolicy = 'no-referrer';
+  f.src = 'https://script.google.com/macros/s/' + d + '/exec#k=' + k;
+  document.body.appendChild(f);
+})();
+</script>
+</body>
+</html>
