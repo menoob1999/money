@@ -63,10 +63,7 @@
   // Size by the real window height ("100%" can be wrong in home-screen apps).
   function fit() { f.style.height = (window.innerHeight - cut) + 'px'; }
   fit();
-  // Screen numbers only (no personal data), shown as a small temporary check line in the app.
-  var dbg = [window.innerHeight, document.documentElement.clientHeight, screen.height,
-    navigator.standalone ? 1 : 0, st, sb, cut].join('.');
-  f.src = 'https://script.google.com/macros/s/' + d + '/exec#k=' + k + '&st=' + st + '&sb=' + sb + '&dbg=' + dbg;
+  f.src = 'https://script.google.com/macros/s/' + d + '/exec#k=' + k + '&st=' + st + '&sb=' + sb;
   window.addEventListener('resize', fit);
   window.addEventListener('orientationchange', function () { setTimeout(fit, 300); });
 })();
