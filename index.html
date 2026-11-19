@@ -16,11 +16,14 @@
 <link rel="icon" type="image/png" href="icon-180.png">
 <title>Money</title>
 <style>
-  html, body { margin: 0; height: 100%; background: #1B1630; overflow: hidden; }
+  html, body { margin: 0; background: #1B1630; }
+  html { overflow: hidden; }
   /* The frame covers the WHOLE screen (the script below sets its exact height, because "100%" in a
      home-screen web app can stop short of the bottom). The app leaves room for the Dynamic Island
      and home bar using the sizes measured by #probe. */
-  iframe { position: fixed; left: 0; top: 0; width: 100%; height: 100vh; border: 0; background: #1B1630; }
+  /* Not "fixed": on iPhone home-screen apps fixed layers are only drawn down to (screen − status bar),
+     which hid the bottom 62pt. A normal block with an exact pixel height is drawn to the bottom. */
+  iframe { display: block; position: absolute; left: 0; top: 0; width: 100%; height: 100vh; border: 0; background: #1B1630; }
   #probe { position: fixed; top: 0; left: 0; width: 1px; visibility: hidden; pointer-events: none;
            padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
   #msg { display: none; height: 100%; align-items: center; justify-content: center; text-align: center;
@@ -63,11 +66,14 @@
       full = Math.max(full, land ? screen.width : screen.height);
     }
     f.style.height = full + 'px';
+    document.body.style.height = full + 'px';
+    document.documentElement.style.height = full + 'px';
   }
   fit();
   // Screen numbers only (no personal data), shown as a small temporary check line in the app.
   var dbg = [window.innerHeight, document.documentElement.clientHeight, screen.height,
-    navigator.standalone ? 1 : 0, f.getBoundingClientRect().top, f.getBoundingClientRect().height].map(Math.round).join('.');
+    navigator.standalone ? 1 : 0, f.getBoundingClientRect().top, f.getBoundingClientRect().height,
+    window.visualViewport ? visualViewport.height : 0, window.visualViewport ? visualViewport.offsetTop : 0].map(Math.round).join('.');
   f.src = 'https://script.google.com/macros/s/' + d + '/exec#k=' + k + '&st=' + st + '&sb=' + sb + '&dbg=' + dbg;
   window.addEventListener('resize', fit);
   window.addEventListener('orientationchange', function () { setTimeout(fit, 300); });
