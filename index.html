@@ -51,20 +51,21 @@
   // A frame can't see the clock-bar / home-bar sizes, so pass them along (plain numbers only).
   var p = document.getElementById('probe'), cs = getComputedStyle(p);
   var st = Math.round(parseFloat(cs.paddingTop) || 0), sb = Math.round(parseFloat(cs.paddingBottom) || 0);
+  // iOS home-screen app with the "black" status bar: the page starts BELOW the clock bar but iOS still
+  // reports the full screen height, so the bottom part hangs off the screen. Use only what is visible.
+  var cut = 0;
   if (navigator.standalone) {
     var tall = Math.max(screen.width, screen.height);
-    // Page drawn under the clock but iOS says 0: use the Dynamic Island height.
-    if (!st && window.innerHeight >= tall - 1) st = 59;
-    // Face ID iPhones have a home bar; iOS sometimes says 0.
-    if (!sb && tall >= 812) sb = 34;
+    if (!st && window.innerHeight >= tall - 1) cut = tall >= 874 ? 62 : 59;  // clock bar height
+    if (!sb && tall >= 812) sb = 34;  // Face ID iPhones have a home bar; iOS sometimes says 0
   }
   document.body.appendChild(f);
   // Size by the real window height ("100%" can be wrong in home-screen apps).
-  function fit() { f.style.height = window.innerHeight + 'px'; }
+  function fit() { f.style.height = (window.innerHeight - cut) + 'px'; }
   fit();
   // Screen numbers only (no personal data), shown as a small temporary check line in the app.
   var dbg = [window.innerHeight, document.documentElement.clientHeight, screen.height,
-    navigator.standalone ? 1 : 0, st, sb].join('.');
+    navigator.standalone ? 1 : 0, st, sb, cut].join('.');
   f.src = 'https://script.google.com/macros/s/' + d + '/exec#k=' + k + '&st=' + st + '&sb=' + sb + '&dbg=' + dbg;
   window.addEventListener('resize', fit);
   window.addEventListener('orientationchange', function () { setTimeout(fit, 300); });
