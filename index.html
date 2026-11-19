@@ -49,6 +49,20 @@
   f.referrerPolicy = 'no-referrer';
   f.src = 'https://script.google.com/macros/s/' + d + '/exec#k=' + k;
   document.body.appendChild(f);
+  // On iPhone home-screen apps "100%" can stop short of the bottom of the screen; size by the window.
+  function fit() {
+    var top = parseFloat(getComputedStyle(f).top) || 0;
+    var full = window.innerHeight;
+    // A home-screen app always fills the whole screen, even when iOS reports a shorter window.
+    if (navigator.standalone) {
+      var land = window.matchMedia && matchMedia('(orientation: landscape)').matches;
+      full = Math.max(full, land ? screen.width : screen.height);
+    }
+    f.style.height = Math.max(0, full - top) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+  window.addEventListener('orientationchange', function () { setTimeout(fit, 300); });
 })();
 </script>
 </body>
