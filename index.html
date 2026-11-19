@@ -53,7 +53,6 @@
   // so pass them along (plain numbers only) and the app leaves exactly that much room.
   var p = document.getElementById('probe'), cs = getComputedStyle(p);
   var st = Math.round(parseFloat(cs.paddingTop) || 0), sb = Math.round(parseFloat(cs.paddingBottom) || 0);
-  f.src = 'https://script.google.com/macros/s/' + d + '/exec#k=' + k + '&st=' + st + '&sb=' + sb;
   document.body.appendChild(f);
   // On iPhone home-screen apps "100%" can stop short of the bottom of the screen; size by the window.
   function fit() {
@@ -66,6 +65,10 @@
     f.style.height = full + 'px';
   }
   fit();
+  // Screen numbers only (no personal data), shown as a small temporary check line in the app.
+  var dbg = [window.innerHeight, document.documentElement.clientHeight, screen.height,
+    navigator.standalone ? 1 : 0, f.getBoundingClientRect().top, f.getBoundingClientRect().height].map(Math.round).join('.');
+  f.src = 'https://script.google.com/macros/s/' + d + '/exec#k=' + k + '&st=' + st + '&sb=' + sb + '&dbg=' + dbg;
   window.addEventListener('resize', fit);
   window.addEventListener('orientationchange', function () { setTimeout(fit, 300); });
 })();
